@@ -37,6 +37,7 @@ import (
 
 	viewv1 "github.com/wafuwafu13/learn-kubebuilder/api/v1"
 	"github.com/wafuwafu13/learn-kubebuilder/internal/controller"
+	webhookv1 "github.com/wafuwafu13/learn-kubebuilder/internal/webhook/v1"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -184,6 +185,13 @@ func main() {
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "MarkdownView")
 		os.Exit(1)
+	}
+	// nolint:goconst
+	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
+		if err := webhookv1.SetupMarkdownViewWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "MarkdownView")
+			os.Exit(1)
+		}
 	}
 	// +kubebuilder:scaffold:builder
 
