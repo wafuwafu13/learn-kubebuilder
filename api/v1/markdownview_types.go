@@ -30,9 +30,21 @@ type MarkdownViewSpec struct {
 	// The following markers will use OpenAPI v3 schema to validate the value
 	// More info: https://book.kubebuilder.io/reference/markers/crd-validation.html
 
-	// foo is an example field of MarkdownView. Edit markdownview_types.go to remove/update
-	// +optional
-	Foo *string `json:"foo,omitempty"`
+	// Markdowns contain the markdown files you want to display.
+    // The key indicates the file name and must not overlap with the keys.
+    // The value is the content in markdown format.
+    //+kubebuilder:validation:Required
+    //+kubebuilder:validation:MinProperties=1
+    Markdowns map[string]string `json:"markdowns,omitempty"`
+
+    // Replicas is the number of viewers.
+    // +kubebuilder:default=1
+    // +optional
+    Replicas int32 `json:"replicas,omitempty"`
+
+    // ViewerImage is the image name of the viewer.
+    // +optional
+    ViewerImage string `json:"viewerImage,omitempty"`
 }
 
 // MarkdownViewStatus defines the observed state of MarkdownView.
@@ -58,8 +70,16 @@ type MarkdownViewStatus struct {
 	Conditions []metav1.Condition `json:"conditions,omitempty"`
 }
 
+const (
+    TypeMarkdownViewAvailable = "Available"
+    TypeMarkdownViewDegraded  = "Degraded"
+)
+
+
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Replicas",type="integer",JSONPath=".spec.replicas"
+// +kubebuilder:printcolumn:name="Available",type="string",JSONPath=".status.conditions[?(@.type==\"Available\")].status"
 
 // MarkdownView is the Schema for the markdownviews API
 type MarkdownView struct {

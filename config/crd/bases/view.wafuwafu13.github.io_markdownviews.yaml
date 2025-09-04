@@ -14,7 +14,14 @@ spec:
     singular: markdownview
   scope: Namespaced
   versions:
-  - name: v1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.replicas
+      name: Replicas
+      type: integer
+    - jsonPath: .status.conditions[?(@.type=="Available")].status
+      name: Available
+      type: string
+    name: v1
     schema:
       openAPIV3Schema:
         description: MarkdownView is the Schema for the markdownviews API
@@ -39,10 +46,25 @@ spec:
           spec:
             description: spec defines the desired state of MarkdownView
             properties:
-              foo:
-                description: foo is an example field of MarkdownView. Edit markdownview_types.go
-                  to remove/update
+              markdowns:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Markdowns contain the markdown files you want to display.
+                  The key indicates the file name and must not overlap with the keys.
+                  The value is the content in markdown format.
+                minProperties: 1
+                type: object
+              replicas:
+                default: 1
+                description: Replicas is the number of viewers.
+                format: int32
+                type: integer
+              viewerImage:
+                description: ViewerImage is the image name of the viewer.
                 type: string
+            required:
+            - markdowns
             type: object
           status:
             description: status defines the observed state of MarkdownView
